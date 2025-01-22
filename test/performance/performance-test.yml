@@ -1,0 +1,51 @@
+config:
+  target: "http://localhost:3000" # Cambia al endpoint correcto
+  phases:
+    - duration: 60              # Duración de la prueba en segundos
+      arrivalRate: 10           # Solicitudes por segundo
+  variables:
+    idEvento: ["12345", "67890"] # IDs de eventos válidos
+    idUser: ["111", "222"]       # IDs de usuarios válidos
+  processor: "./token-processor.js" # Script para manejar el token
+scenarios:
+  - name: "Tienda y Compras"
+    flow:
+      - get:
+          url: "/tienda"
+      - post:
+          url: "/tienda/realizar-compra"
+          json:
+            idEvento: "{{ idEvento }}"
+            idUser: "{{ idUser }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+  - name: "BackOffice"
+    flow:
+      - get:
+          url: "/backoffice/eventos"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - post:
+          url: "/backoffice/eventos"
+          json:
+            nombre: "Evento Prueba"
+            descripcion: "Descripción de prueba"
+            fecha: "2025-01-22"
+            hora: "18:00"
+            lugar: "Sala Principal"
+            ciudad: "Lima"
+            urlImagen: "http://example.com/imagen.jpg"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+  - name: "Perfil y Wishlist"
+    flow:
+      - get:
+          url: "/perfil/info-account"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - post:
+          url: "/perfil/add-to-wishlist"
+          json:
+            idEvento: "{{ idEvento }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
